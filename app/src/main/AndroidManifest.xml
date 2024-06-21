@@ -11,10 +11,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".CoinDetailActivity"
+            android:name=".presentation.view.CoinDetailFragment"
             android:exported="false" />
         <activity
-            android:name=".CoinPriceListActivity"
+            android:name=".presentation.view.CoinPriceListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
