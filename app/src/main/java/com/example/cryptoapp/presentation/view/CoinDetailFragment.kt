@@ -6,24 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.cryptoapp.databinding.ActivityCoinDetailBinding
+import com.example.cryptoapp.databinding.FragmentCoinDetailBinding
 import com.example.cryptoapp.domain.model.CoinInfo
 import com.squareup.picasso.Picasso
 
 class CoinDetailFragment : Fragment() {
 
-    private var fromSymbol: String? = null
-
-    override fun onCreate(savedInstanceState : Bundle?) {
-        super.onCreate(savedInstanceState)
-        fromSymbol = arguments?.getString(EXTRA_FROM_SYMBOL)
-    }
 
     private val viewModel: MainViewModel by lazy {
         ViewModelProvider(this)[MainViewModel::class.java]
     }
-    private var _binding: ActivityCoinDetailBinding? = null
-    private val binding: ActivityCoinDetailBinding
+    private var _binding: FragmentCoinDetailBinding? = null
+    private val binding: FragmentCoinDetailBinding
         get() = _binding ?: throw RuntimeException("CoinDetailFragment == null")
 
     override fun onCreateView(
@@ -31,18 +25,18 @@ class CoinDetailFragment : Fragment() {
         container : ViewGroup?,
         savedInstanceState : Bundle?
     ) : View {
-        _binding = ActivityCoinDetailBinding.inflate(inflater, container, false)
+        _binding = FragmentCoinDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view : View, savedInstanceState : Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.getDetailInfo(fromSymbol ?: UNKNOWN_PARAM).observe(viewLifecycleOwner) {
+        val fSym = getSymbol()
+        viewModel.getDetailInfo(fSym).observe(viewLifecycleOwner) {
             initializeData(it)
         }
 
     }
-
 
     private fun initializeData(coinPriceInfo : CoinInfo) {
         with(binding) {
@@ -57,6 +51,10 @@ class CoinDetailFragment : Fragment() {
         }
     }
 
+    private fun getSymbol(): String {
+        return requireArguments().getString(EXTRA_FROM_SYMBOL, UNKNOWN_PARAM)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
@@ -65,7 +63,7 @@ class CoinDetailFragment : Fragment() {
     companion object {
         private const val UNKNOWN_PARAM = ""
         private const val EXTRA_FROM_SYMBOL = "fSym"
-        fun newIntent(fromSymbol: String): CoinDetailFragment {
+        fun newInstance(fromSymbol: String): Fragment {
             return CoinDetailFragment().apply {
                 arguments = Bundle().apply {
                     putString(EXTRA_FROM_SYMBOL, fromSymbol)

@@ -11,9 +11,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".presentation.view.CoinDetailFragment"
-            android:exported="false" />
-        <activity
             android:name=".presentation.view.CoinPriceListActivity"
             android:exported="true">
             <intent-filter>
@@ -22,6 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".presentation.view.CoinDetailActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

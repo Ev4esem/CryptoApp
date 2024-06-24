@@ -10,26 +10,55 @@ import com.example.cryptoapp.presentation.adapters.CoinInfoAdapter
 
 class CoinPriceListActivity : AppCompatActivity() {
 
-    private var _binding : ActivityCoinPrceListBinding? = null
-    private val binding : ActivityCoinPrceListBinding
-        get() = _binding ?: throw RuntimeException("CoinPriceListActivity == null")
+    private lateinit var  binding : ActivityCoinPrceListBinding
+    private val adapter by lazy {
+        CoinInfoAdapter()
+    }
+    private val viewModel : MainViewModel by lazy {
+        ViewModelProvider(this)[MainViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
-        _binding = ActivityCoinPrceListBinding.inflate(layoutInflater)
+        binding = ActivityCoinPrceListBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        launchFragment()
+        initializeRV()
     }
 
-    private fun launchFragment() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.container, CoinPriceListFragment.newIntent())
+    private fun initializeRV() {
+        binding.rvCoinPriceList.layoutManager = LinearLayoutManager(this)
+        binding.rvCoinPriceList.adapter = adapter
+        binding.rvCoinPriceList.itemAnimator = null
+        viewModel.coinInfoList.observe(this) {
+            adapter.submitList(it)
+        }
+
+        adapter.onCoinClickListener = {
+            if (isOnePaneMode()) {
+                launchDetailActivity(it.fromSymbol ?: "")
+            } else {
+                launchFragment(it.fromSymbol ?: "")
+            }
+        }
+    }
+
+    private fun isOnePaneMode() = binding.containerLand == null
+
+    private fun launchDetailActivity(fromSymbol : String) {
+        val intent = CoinDetailActivity.newIntent(
+            this@CoinPriceListActivity,
+            fromSymbol
+        )
+        startActivity(intent)
+    }
+
+    private fun launchFragment(fromSymbol : String,) {
+        supportFragmentManager.popBackStack()
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.container_land, CoinDetailFragment.newInstance(fromSymbol))
+            .addToBackStack(null)
             .commit()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 
 }

@@ -9,7 +9,9 @@ import com.example.cryptoapp.domain.usecases.GetPriceListUseCase
 import com.example.cryptoapp.domain.usecases.LoadDataUseCase
 import kotlinx.coroutines.launch
 
-class MainViewModel(application : Application): AndroidViewModel(application) {
+class MainViewModel(
+    application : Application,
+): AndroidViewModel(application) {
 
     private val repository = CryptoRepositoryImpl(application)
 
