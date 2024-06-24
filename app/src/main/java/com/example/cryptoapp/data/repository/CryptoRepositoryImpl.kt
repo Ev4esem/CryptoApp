@@ -1,8 +1,10 @@
 package com.example.cryptoapp.data.repository
 
+import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import com.example.cryptoapp.data.local_source.AppDatabase
 import com.example.cryptoapp.data.mapper.toCoinInfo
 import com.example.cryptoapp.data.mapper.toCoinInfoDb
@@ -15,7 +17,7 @@ import com.example.cryptoapp.domain.repository.CryptoRepository
 import kotlinx.coroutines.delay
 
 class CryptoRepositoryImpl(
-    private val application : Application
+    application : Application
 ) : CryptoRepository {
 
     private val coinInfoDao = AppDatabase.getInstance(application).coinInfoDao()
@@ -23,7 +25,7 @@ class CryptoRepositoryImpl(
 
 
     override fun getCoinInfoList() : LiveData<List<CoinInfo>> {
-        return Transformations.map(coinInfoDao.getPriceList()) { listCoinInfoDb ->
+        return coinInfoDao.getPriceList().map { listCoinInfoDb ->
             listCoinInfoDb.map { coinInfoDb ->
                 coinInfoDb.toCoinInfo()
             }
@@ -31,19 +33,24 @@ class CryptoRepositoryImpl(
     }
 
     override fun getCoinById(fromSym : String) : LiveData<CoinInfo> {
-        return Transformations.map(coinInfoDao.getPriceInfoCoinById(fromSym)) {
+        return coinInfoDao.getPriceInfoCoinById(fromSym).map {
             it.toCoinInfo()
         }
     }
 
+    @SuppressLint("LongLogTag")
     override suspend fun loadData() {
         while (true) {
-            val topCoins = apiService.getTopCoinsInfo(limit = 50)
-            val fSyms = topCoins.toNamesListToString()
-            val jsonContainer = apiService.getFullPriceList(fSyms = fSyms)
-            val coinInfoDtoList = jsonContainer.toJsonContainerToListCoinInfo()
-            val dbModelList = coinInfoDtoList.map { it.toCoinInfoDb() }
-            coinInfoDao.insertPriceList(dbModelList)
+            try {
+                val topCoins = apiService.getTopCoinsInfo(limit = 50)
+                val fSyms = topCoins.toNamesListToString()
+                val jsonContainer = apiService.getFullPriceList(fSyms = fSyms)
+                val coinInfoDtoList = jsonContainer.toJsonContainerToListCoinInfo()
+                val dbModelList = coinInfoDtoList.map { it.toCoinInfoDb() }
+                coinInfoDao.insertPriceList(dbModelList)
+            } catch (e : Exception) {
+                Log.e("ErrorCryptoRepositoryImpl", e.toString())
+            }
             delay(10000)
         }
     }

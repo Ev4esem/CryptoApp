@@ -8,14 +8,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.cryptoapp.databinding.ActivityCoinDetailBinding
 import com.example.cryptoapp.domain.model.CoinInfo
-import com.example.cryptoapp.presentation.extensions.toConvertTimestampToTime
-import com.example.cryptoapp.presentation.extensions.toGetFullImageUrl
 import com.squareup.picasso.Picasso
 
 class CoinDetailFragment : Fragment() {
 
-    private val viewModel: CoinViewModel by lazy {
-        ViewModelProvider(this)[CoinViewModel::class.java]
+    private var fromSymbol: String? = null
+
+    override fun onCreate(savedInstanceState : Bundle?) {
+        super.onCreate(savedInstanceState)
+        fromSymbol = arguments?.getString(EXTRA_FROM_SYMBOL)
+    }
+
+    private val viewModel: MainViewModel by lazy {
+        ViewModelProvider(this)[MainViewModel::class.java]
     }
     private var _binding: ActivityCoinDetailBinding? = null
     private val binding: ActivityCoinDetailBinding
@@ -32,9 +37,10 @@ class CoinDetailFragment : Fragment() {
 
     override fun onViewCreated(view : View, savedInstanceState : Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.coinPriceInfo.observe(viewLifecycleOwner) {
+        viewModel.getDetailInfo(fromSymbol ?: UNKNOWN_PARAM).observe(viewLifecycleOwner) {
             initializeData(it)
         }
+
     }
 
 
@@ -44,10 +50,10 @@ class CoinDetailFragment : Fragment() {
             tvMinPrice.text = coinPriceInfo.lowDay
             tvMaxPrice.text = coinPriceInfo.highDay
             tvLastMarket.text = coinPriceInfo.lastMarket
-            tvLastUpdate.text = coinPriceInfo.lastUpdate.toConvertTimestampToTime()
+            tvLastUpdate.text = coinPriceInfo.lastUpdate
             tvFromSymbol.text = coinPriceInfo.fromSymbol
             tvToSymbol.text = coinPriceInfo.toSymbol
-            Picasso.get().load(coinPriceInfo.imageUrl.toGetFullImageUrl()).into(ivLogoCoin)
+            Picasso.get().load(coinPriceInfo.imageUrl).into(ivLogoCoin)
         }
     }
 
@@ -57,6 +63,7 @@ class CoinDetailFragment : Fragment() {
     }
 
     companion object {
+        private const val UNKNOWN_PARAM = ""
         private const val EXTRA_FROM_SYMBOL = "fSym"
         fun newIntent(fromSymbol: String): CoinDetailFragment {
             return CoinDetailFragment().apply {

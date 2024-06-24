@@ -5,7 +5,7 @@ import com.example.cryptoapp.domain.model.CoinInfo
 
 class CoinInfoDiffUtil: DiffUtil.ItemCallback<CoinInfo>() {
     override fun areItemsTheSame(oldItem : CoinInfo, newItem : CoinInfo) : Boolean {
-        return oldItem.lastTradeId == newItem.lastTradeId
+        return oldItem.fromSymbol == newItem.fromSymbol
     }
 
     override fun areContentsTheSame(oldItem : CoinInfo, newItem : CoinInfo) : Boolean {
